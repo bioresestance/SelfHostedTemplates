@@ -1,0 +1,38 @@
+version: "3.7"
+
+########################### NETWORKS ########################### 
+networks:
+  gitea:
+    external: false
+    
+########################### Services ########################### 
+
+services:
+
+  git-db:
+    image: mariadb:latest
+    container_name: gitea_db
+    volumes:
+      - ../appdata/gitea/gitea-db-data:/var/lib/mysql
+    restart: unless-stopped
+    env_file:
+      - ../appdata/gitea/gitea-db.env
+    networks:
+      - gitea 
+
+  git:
+    image: gitea/gitea:latest
+    container_name: gitea
+    env_file:
+      - ../appdata/gitea/gitea.env
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+    networks:
+      - gitea 
+    volumes:
+      - ../appdata/gitea/gitea-data:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    depends_on:
+      - git-db
